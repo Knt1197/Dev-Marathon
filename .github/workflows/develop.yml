@@ -15,4 +15,4 @@ jobs:
           username: ${{ secrets.DEV_SSH_USER }}
           key: ${{ secrets.DEV_SSH_SSH_KEY }}
           script: |
-            bash /app/kanta.maruhashi/deploy.sh kanta_maruhashi
+            bash /app/kanta_maruhashi/deploy.sh kanta_maruhashi
