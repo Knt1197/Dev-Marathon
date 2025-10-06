@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>顧客詳細</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">顧客詳細</h2>
+        <div id="customer-detail"></div>
+        <a href="list.html" class="btn btn-primary mt-3">一覧へ戻る</a>
+        <a id="update-button" href="#" class="btn btn-warning mt-3">編集</a>
+        <button id="delete-button" class="btn btn-danger mt-3">削除</button>
+    </div>
+
+    <script type="module">
+        import config from '../config.js';
+
+        const params = new URLSearchParams(window.location.search);
+        const customerId = params.get('id');
+
+        if (customerId) {
+            // 顧客情報の取得と表示
+            fetch(`${config.apiUrl}/customers/${customerId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Customer not found');
+                    }
+                    return response.json();
+                })
+                .then(customer => {
+                    const detailDiv = document.getElementById('customer-detail');
+                    let content = '<ul class="list-group">';
+                    for (const key in customer) {
+                        content += `<li class="list-group-item"><strong>${key}:</strong> ${customer[key] || 'N/A'}</li>`;
+                    }
+                    content += '</ul>';
+                    detailDiv.innerHTML = content;
+
+                    // 編集ボタンに正しいリンクを設定
+                    document.getElementById('update-button').href = `update.html?id=${customerId}`;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('customer-detail').innerHTML = `<p class="text-danger">${error.message}</p>`;
+                });
+
+            // 削除ボタンの処理
+            document.getElementById('delete-button').addEventListener('click', () => {
+                if (confirm('本当にこの顧客情報を削除してよろしいですか？')) {
+                    fetch(`${config.apiUrl}/customers/${customerId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('顧客情報を削除しました。');
+                            window.location.href = 'list.html';
+                        } else {
+                            alert('削除に失敗しました。');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('削除中にエラーが発生しました。');
+                    });
+                }
+            });
+        } else {
+            document.getElementById('customer-detail').innerHTML = '<p class="text-danger">No customer ID provided.</p>';
+        }
+    </script>
+</body>
+</html>

@@ -3,20 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>案件情報入力</title>
-    <!-- Bootstrap CSSの読み込み -->
+    <title>顧客情報編集</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <!-- ここにHTMLを書く -->
+        <h2 class="mb-4">顧客情報を編集してください</h2>
+        <form id="customer-form">
+            <input type="hidden" id="customerId" name="customerId">
+            <div class="form-group">
+                <label for="company_name">会社名:</label>
+                <input type="text" class="form-control" id="company_name" name="company_name" required>
+            </div>
+            <div class="form-group">
+                <label for="industry">業種:</label>
+                <input type="text" class="form-control" id="industry" name="industry" required>
+            </div>
+            <div class="form-group">
+                <label for="contact">連絡先:</label>
+                <input type="text" class="form-control" id="contact" name="contact" required>
+            </div>
+            <div class="form-group">
+                <label for="location">所在地:</label>
+                <input type="text" class="form-control" id="location" name="location" required>
+            </div>
+            <button type="submit" class="btn btn-primary">確認画面へ</button>
+            <a href="#" id="back-link" class="btn btn-secondary">詳細へ戻る</a>
+        </form>
     </div>
     <script type="module">
-        <!-- ここにJSを書く -->
+        import config from '../config.js';
+
+        const params = new URLSearchParams(window.location.search);
+        const customerId = params.get('id');
+
+        // 戻るリンクを設定
+        document.getElementById('back-link').href = `detail.html?id=${customerId}`;
+
+        // 既存の顧客情報を取得してフォームに設定
+        if (customerId) {
+            fetch(`${config.apiUrl}/customers/${customerId}`)
+                .then(response => response.json())
+                .then(customer => {
+                    document.getElementById('customerId').value = customer.customer_id;
+                    document.getElementById('company_name').value = customer.company_name;
+                    document.getElementById('industry').value = customer.industry;
+                    document.getElementById('contact').value = customer.contact;
+                    document.getElementById('location').value = customer.location;
+                });
+        }
+
+        // フォーム送信時の処理
+        document.getElementById('customer-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const params = new URLSearchParams(formData);
+            window.location.href = `update-confirm.html?${params.toString()}`;
+        });
     </script>
-    <!-- BootstrapのJavaScriptの読み込み -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>

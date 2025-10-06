@@ -3,20 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>案件情報入力</title>
-    <!-- Bootstrap CSSの読み込み -->
+    <title>顧客情報更新確認</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <!-- ここにHTMLを書く -->
+        <h2 class="mb-4">以下の内容で更新します</h2>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">更新内容</h5>
+                <p class="card-text"><strong>会社名:</strong> <span id="company_name"></span></p>
+                <p class="card-text"><strong>業種:</strong> <span id="industry"></span></p>
+                <p class="card-text"><strong>連絡先:</strong> <span id="contact"></span></p>
+                <p class="card-text"><strong>所在地:</strong> <span id="location"></span></p>
+            </div>
+        </div>
+        <div class="mt-4">
+            <button id="confirm-button" class="btn btn-success">この内容で更新</button>
+            <button onclick="history.back()" class="btn btn-secondary">修正</button>
+        </div>
     </div>
     <script type="module">
-        <!-- ここにJSを書く -->
+        import config from '../config.js';
+
+        const params = new URLSearchParams(window.location.search);
+        const customerData = {
+            customerId: params.get('customerId'),
+            company_name: params.get('company_name'),
+            industry: params.get('industry'),
+            contact: params.get('contact'),
+            location: params.get('location')
+        };
+
+        // 画面にデータを表示
+        document.getElementById('company_name').textContent = customerData.company_name;
+        document.getElementById('industry').textContent = customerData.industry;
+        document.getElementById('contact').textContent = customerData.contact;
+        document.getElementById('location').textContent = customerData.location;
+
+        // 確定ボタンの処理
+        document.getElementById('confirm-button').addEventListener('click', function() {
+            fetch(`${config.apiUrl}/customers/${customerData.customerId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(customerData)
+            }).then(response => response.json())
+              .then(data => {
+                if(data.success) {
+                    alert('顧客情報を更新しました。');
+                    window.location.href = `detail.html?id=${customerData.customerId}`; // 詳細ページに遷移
+                } else {
+                    alert('更新に失敗しました。');
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('エラーが発生しました。');
+              });
+        });
     </script>
-    <!-- BootstrapのJavaScriptの読み込み -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>

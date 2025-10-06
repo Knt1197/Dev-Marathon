@@ -3,16 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>案件情報入力</title>
+    <title>顧客情報確認</title>
     <!-- Bootstrap CSSの読み込み -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <!-- ここにHTMLを書く -->
+        <h2 class="mb-4">以下の内容で登録します</h2>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">登録内容</h5>
+                <p class="card-text"><strong>会社名:</strong> <span id="companyName"></span></p>
+                <p class="card-text"><strong>業種:</strong> <span id="industry"></span></p>
+                <p class="card-text"><strong>連絡先:</strong> <span id="contact"></span></p>
+                <p class="card-text"><strong>所在地:</strong> <span id="location"></span></p>
+            </div>
+        </div>
+        <div class="mt-4">
+            <button id="confirm-button" class="btn btn-success">確定</button>
+            <button onclick="history.back()" class="btn btn-secondary">修正</button>
+        </div>
     </div>
     <script type="module">
-        <!-- ここにJSを書く -->
+        import config from '../config.js';
+
+        const params = new URLSearchParams(window.location.search);
+        const customerData = {
+            companyName: params.get('companyName'),
+            industry: params.get('industry'),
+            contact: params.get('contact'),
+            location: params.get('location')
+        };
+
+        // 画面にデータを表示
+        document.getElementById('companyName').textContent = customerData.companyName;
+        document.getElementById('industry').textContent = customerData.industry;
+        document.getElementById('contact').textContent = customerData.contact;
+        document.getElementById('location').textContent = customerData.location;
+
+        // 確定ボタンの処理
+        document.getElementById('confirm-button').addEventListener('click', function() {
+            fetch(config.apiUrl + '/add-customer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(customerData)
+            }).then(response => response.json())
+              .then(data => {
+                if(data.success) {
+                    alert('顧客情報が正常に保存されました。');
+                    window.location.href = 'list.html'; // 一覧ページに遷移
+                } else {
+                    alert('保存に失敗しました。重複した連絡先でないか確認してください。');
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('エラーが発生しました。');
+              });
+        });
     </script>
     <!-- BootstrapのJavaScriptの読み込み -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
