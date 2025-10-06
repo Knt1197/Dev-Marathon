@@ -1,12 +1,21 @@
 name: ssh command
+
 on:
   push:
     branches:
       - develop
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      # 🔹 ソースコードを取得
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # ← 完全な履歴を取得（タグ・コミット情報も利用可）
+
+      # 🔹 SSHでリモートサーバーにデプロイ
       - id: ssh
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -16,3 +25,4 @@ jobs:
           key: ${{ secrets.DEV_SSH_SSH_KEY }}
           script: |
             bash /app/kanta_maruhashi/deploy.sh kanta_maruhashi
+
