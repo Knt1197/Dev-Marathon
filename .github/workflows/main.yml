@@ -40,5 +40,22 @@ jobs:
           key: ${{ secrets.MAIN_SSH_SSH_KEY }}
           script: |
             echo "🚀 本番サーバーへデプロイを開始します..."
+            cd /app/kanta_maruhashi
+
+            # ✅ Gitリポジトリを最新化（手動との差異を防ぐ）
+            echo "📦 最新ソースを取得中..."
+            git pull origin main
+
+            # ✅ コピー元が存在するかチェック
+            if [ ! -d "./src/web" ]; then
+              echo "❌ src/web が存在しません。デプロイを中止します。"
+              exit 1
+            fi
+
+            echo "📂 src/web の内容を確認:"
+            ls -l ./src/web | head -n 10
+
+            # デプロイスクリプト実行
             bash /app/kanta_maruhashi/deploy.sh kanta_maruhashi
+
             echo "✅ デプロイ完了！"
