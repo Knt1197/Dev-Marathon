@@ -51,6 +51,12 @@ app.get("/customers/:id", async (req, res) => {
 app.post("/add-customer", async (req, res) => {
   try {
     const { companyName, industry, contact, location } = req.body;
+
+    // Basic validation
+    if (!companyName || !industry || !contact || !location) {
+      return res.status(400).json({ success: false, message: 'すべてのフィールドを入力してください。' });
+    }
+
     const newCustomer = await pool.query(
       "INSERT INTO customers (company_name, industry, contact, location) VALUES ($1, $2, $3, $4) RETURNING *",
       [companyName, industry, contact, location]
@@ -58,7 +64,10 @@ app.post("/add-customer", async (req, res) => {
     res.json({ success: true, customer: newCustomer.rows[0] });
   } catch (err) {
     console.error(err);
-    res.json({ success: false });
+    if (err.code === '23505') { // unique_violation for contact
+      return res.status(400).json({ success: false, message: 'この連絡先は既に使用されています。' });
+    }
+    res.status(500).json({ success: false, message: 'サーバーエラーが発生しました。' });
   }
 });
 

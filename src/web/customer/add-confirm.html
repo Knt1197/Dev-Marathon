@@ -49,18 +49,28 @@
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 body: new URLSearchParams(customerData)
-            }).then(response => response.json())
+            }).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    // エラーレスポンスからJSONを読み取り、Promiseをリジェクトする
+                    return response.json().then(err => Promise.reject(err));
+                }
+            })
               .then(data => {
                 if(data.success) {
                     alert('顧客情報が正常に保存されました。');
                     window.location.href = 'list.html'; // 一覧ページに遷移
                 } else {
-                    alert('保存に失敗しました。重複した連絡先でないか確認してください。');
+                    // 基本的にここには来ないが、念のため残す
+                    alert('保存に失敗しました。');
                 }
               })
               .catch(error => {
                 console.error('Error:', error);
-                alert('エラーが発生しました。');
+                // エラーオブジェクトにmessageプロパティがあればそれを表示
+                const errorMessage = error.message || 'エラーが発生しました。';
+                alert(errorMessage);
               });
         });
     </script>

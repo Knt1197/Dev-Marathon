@@ -31,10 +31,23 @@
                     return response.json();
                 })
                 .then(customer => {
+                    document.title = `${customer.company_name} - 顧客詳細`; // タイトルを更新
                     const detailDiv = document.getElementById('customer-detail');
+                    const keyMap = {
+                        customer_id: '顧客ID',
+                        company_name: '会社名',
+                        industry: '業種',
+                        contact: '連絡先',
+                        location: '所在地',
+                        created_date: '登録日',
+                        updated_date: '更新日'
+                    };
+
                     let content = '<ul class="list-group">';
                     for (const key in customer) {
-                        content += `<li class="list-group-item"><strong>${key}:</strong> ${customer[key] || 'N/A'}</li>`;
+                        if (key === 'customer_id') continue; // Skip customer_id
+                        const label = keyMap[key] || key;
+                        content += `<li class="list-group-item"><strong>${label}:</strong> ${customer[key] || 'N/A'}</li>`;
                     }
                     content += '</ul>';
                     detailDiv.innerHTML = content;
