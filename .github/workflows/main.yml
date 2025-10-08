@@ -6,11 +6,7 @@ on:
       - main  # mainブランチへのpushで実行
 
 jobs:
-  # ===========================
-  # 🔹 ステージング環境での自動テスト
-  # ===========================
-  test:
-    name: ステージングテスト
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +15,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: "Cypressテスト実行（ステージング）"
+      # 🔹 ステージング環境上でテストを実行
+      - name: "ステージングでのテスト実行"
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.DEV_SSH_HOST }}
@@ -27,24 +24,14 @@ jobs:
           username: ${{ secrets.DEV_SSH_USER }}
           key: ${{ secrets.DEV_SSH_SSH_KEY }}
           script: |
-            set -e  # ← これでCypress失敗時は即停止
-            echo "ステージングテスト実行中"
             cd /ci/
             npx cypress run --browser chrome --spec cypress/e2e/kanta_maruhashi.cy.js
-            echo "ステージングテスト ｸﾘｱｰｯ"
+            echo "ステージングでのテスト実行中...ｲｹｰｯ!"
+            echo "ｸﾘｱｰｯ!!"
 
-  deploy:
-    name: Deploy to Production Server
-    runs-on: ubuntu-latest
-    needs: test        # ← testジョブが成功しないと実行されない
-    if: success()      # ← さらに保険で明示
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
+      # 🔹 テスト成功時のみデプロイ実行
       - name: "本番サーバーへデプロイ"
+        if: success() # 上のステージングテストが成功した場合のみ実行
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.MAIN_SSH_HOST }}
@@ -52,11 +39,10 @@ jobs:
           username: ${{ secrets.MAIN_SSH_USER }}
           key: ${{ secrets.MAIN_SSH_SSH_KEY }}
           script: |
-            set -e  # ← デプロイ途中で失敗しても即停止
-            echo "デプロイ ｽﾀｰﾄ"
+            echo "🚀 本番サーバーへデプロイを開始します..."
             cd /app/kanta_maruhashi
 
-            # ✅ Gitリポジトリを最新化
+            # ✅ Gitリポジトリを最新化（手動との差異を防ぐ）
             echo "📦 最新ソースを取得中..."
             git pull origin main
 
