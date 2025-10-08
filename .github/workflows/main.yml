@@ -22,7 +22,7 @@ jobs:
           host: ${{ secrets.DEV_SSH_HOST }}
           port: ${{ secrets.DEV_SSH_PORT }}
           username: ${{ secrets.DEV_SSH_USER }}
-          key: ${{ secrets.DEV_SSH_KEY }}
+          key: ${{ secrets.DEV_SSH_SSH_KEY }}
           script: |
             cd /ci/
             npx cypress run --browser chrome --spec cypress/e2e/kanta_maruhashi.cy.js
