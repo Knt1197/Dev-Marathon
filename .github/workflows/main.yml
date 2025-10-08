@@ -1,0 +1,42 @@
+name: 'ステージングテスト＋本番デプロイ'
+
+on:
+  push:
+    branches:
+      - main  # mainブランチへのpushで実行
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 🔹 ステージング環境上でテストを実行
+      - name: "ステージングでのテスト実行"
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEV_SSH_HOST }}
+          port: ${{ secrets.DEV_SSH_PORT }}
+          username: ${{ secrets.DEV_SSH_USER }}
+          key: ${{ secrets.DEV_SSH_KEY }}
+          script: |
+            cd /ci/
+            npx cypress run --browser chrome --spec cypress/e2e/kanta_maruhashi.cy.js
+            echo "ステージングでのテスト実行中...ｲｹｰｯ!"
+            echo "ｸﾘｱｰｯ!!"
+
+      # 🔹 テスト成功時のみデプロイ実行
+      - name: "本番環境へのデプロイ"
+        if: success()
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.MAIN_SSH_HOST }}
+          port: ${{ secrets.MAIN_SSH_PORT }}
+          username: ${{ secrets.MAIN_SSH_USER }}
+          key: ${{ secrets.MAIN_SSH_SSH_KEY }}
+          script: |
+            bash /app/kanta_maruhashi/deploy.sh kanta_maruhashi
