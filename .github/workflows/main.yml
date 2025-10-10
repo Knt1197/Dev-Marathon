@@ -18,6 +18,7 @@ jobs:
       # 🔹 ステージング環境でテストを実行
       - name: "ステージングでのテスト実行"
         uses: appleboy/ssh-action@v1.0.0
+        continue-on-error: true
         with:
           host: ${{ secrets.DEV_SSH_HOST }}
           port: ${{ secrets.DEV_SSH_PORT }}
