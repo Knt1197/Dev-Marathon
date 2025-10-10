@@ -33,9 +33,10 @@ jobs:
               fi
             done
 
-            # ✅ Gitリポジトリを最新化
+            # ✅ Gitリポジトリを最新化（ローカル変更を破棄して最新状態へ）
             echo "📦 最新ソースを取得中..."
-            git pull origin develop
+            git fetch origin develop
+            git reset --hard origin/develop
 
             # ✅ Node.jsの依存関係をインストール/更新
             echo "📥 依存関係をインストール中..."
