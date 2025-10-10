@@ -42,7 +42,4 @@ jobs:
             echo "🚀 本番サーバーへのデプロイを開始します..."
             cd /app/kanta_maruhashi
             bash deploy.sh production
-            echo "🔄 PM2アプリ再起動..."
-            pm2 restart crm-app
             echo "✅ デプロイ完了！"
-            
