@@ -24,6 +24,7 @@ jobs:
           username: ${{ secrets.DEV_SSH_USER }}
           key: ${{ secrets.DEV_SSH_SSH_KEY }}
           script: |
+            set -e
             cd /ci/
             echo "🧪 ステージング環境で Cypress テストを実行中..."
             npx cypress run --browser chrome --spec cypress/e2e/kanta_maruhashi.cy.js
@@ -39,8 +40,14 @@ jobs:
           username: ${{ secrets.MAIN_SSH_USER }}
           key: ${{ secrets.MAIN_SSH_SSH_KEY }}
           script: |
+            set -e
             echo "🚀 本番サーバーへのデプロイを開始します..."
             cd /app/kanta_maruhashi
+            for file in deploy.sh deploy_staging.sh deploy_production.sh; do
+              if [ -f "$file" ] && ! git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
+                rm -f "$file"
+              fi
+            done
             git pull origin main
-            bash deploy.sh production
+            bash deploy_production.sh
             echo "✅ デプロイ完了！"

@@ -24,8 +24,14 @@ jobs:
           username: ${{ secrets.DEV_SSH_USER }}
           key: ${{ secrets.DEV_SSH_SSH_KEY }}
           script: |
+            set -e
             echo "🚀 ステージングサーバーへデプロイを開始します..."
             cd /app/kanta_maruhashi
+            for file in deploy.sh deploy_staging.sh deploy_production.sh; do
+              if [ -f "$file" ] && ! git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
+                rm -f "$file"
+              fi
+            done
 
             # ✅ Gitリポジトリを最新化
             echo "📦 最新ソースを取得中..."
@@ -37,6 +43,6 @@ jobs:
 
             # ✅ 'staging' を引数として deploy.sh を実行し、環境変数をセット
             echo "🔧 環境変数を設定中..."
-            bash deploy.sh staging
+            bash deploy_staging.sh
 
             echo "✅ デプロイ完了！"
