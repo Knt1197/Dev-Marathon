@@ -41,5 +41,6 @@ jobs:
           script: |
             echo "🚀 本番サーバーへのデプロイを開始します..."
             cd /app/kanta_maruhashi
+            git pull origin main
             bash deploy.sh production
             echo "✅ デプロイ完了！"

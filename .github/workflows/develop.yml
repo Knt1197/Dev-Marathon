@@ -39,9 +39,4 @@ jobs:
             echo "🔧 環境変数を設定中..."
             bash deploy.sh staging
 
-            # ✅ pm2でアプリケーションを再起動して変更を適用
-            echo "🔄 アプリケーションを再起動中..."
-            pm2 restart crm-app
-
             echo "✅ デプロイ完了！"
-
