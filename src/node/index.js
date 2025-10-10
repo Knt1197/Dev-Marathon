@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: '/app/kanta_maruhashi/src/node/.env' });
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
