@@ -3,7 +3,7 @@ name: 'ステージングテスト＋本番デプロイ'
 on:
   push:
     branches:
-      - main  # mainブランチへのpushで実行
+      - main
 
 jobs:
   deploy:
@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 🔹 ステージング環境上でテストを実行
+      # 🔹 ステージング環境でテストを実行
       - name: "ステージングでのテスト実行"
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -25,13 +25,13 @@ jobs:
           key: ${{ secrets.DEV_SSH_SSH_KEY }}
           script: |
             cd /ci/
+            echo "🧪 ステージング環境で Cypress テストを実行中..."
             npx cypress run --browser chrome --spec cypress/e2e/kanta_maruhashi.cy.js
-            echo "ステージングでのテスト実行中...ｲｹｰｯ!"
-            echo "ｸﾘｱｰｯ!!"
+            echo "✅ ステージングテスト完了！"
 
-      # 🔹 テスト成功時のみデプロイ実行
+      # 🔹 テスト成功時のみ本番デプロイを実行
       - name: "本番サーバーへデプロイ"
-        if: success() # 上のステージングテストが成功した場合のみ実行
+        if: success()
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.MAIN_SSH_HOST }}
@@ -39,23 +39,10 @@ jobs:
           username: ${{ secrets.MAIN_SSH_USER }}
           key: ${{ secrets.MAIN_SSH_SSH_KEY }}
           script: |
-            echo "🚀 本番サーバーへデプロイを開始します..."
+            echo "🚀 本番サーバーへのデプロイを開始します..."
             cd /app/kanta_maruhashi
-
-            # ✅ Gitリポジトリを最新化（手動との差異を防ぐ）
-            echo "📦 最新ソースを取得中..."
-            git pull origin main
-
-            # ✅ コピー元が存在するかチェック
-            if [ ! -d "./src/web" ]; then
-              echo "❌ src/web が存在しません。デプロイを中止します。"
-              exit 1
-            fi
-
-            echo "📂 src/web の内容を確認:"
-            ls -l ./src/web | head -n 10
-
-            # デプロイスクリプト実行
-            bash /app/kanta_maruhashi/deploy.sh kanta_maruhashi
-
+            bash deploy.sh production
+            echo "🔄 PM2アプリ再起動..."
+            pm2 restart crm-app
             echo "✅ デプロイ完了！"
+            

@@ -24,5 +24,24 @@ jobs:
           username: ${{ secrets.DEV_SSH_USER }}
           key: ${{ secrets.DEV_SSH_SSH_KEY }}
           script: |
-            bash /app/kanta_maruhashi/deploy.sh kanta_maruhashi
+            echo "🚀 ステージングサーバーへデプロイを開始します..."
+            cd /app/kanta_maruhashi
+
+            # ✅ Gitリポジトリを最新化
+            echo "📦 最新ソースを取得中..."
+            git pull origin develop
+
+            # ✅ Node.jsの依存関係をインストール/更新
+            echo "📥 依存関係をインストール中..."
+            cd src/node && npm install && cd ../..
+
+            # ✅ 'staging' を引数として deploy.sh を実行し、環境変数をセット
+            echo "🔧 環境変数を設定中..."
+            bash deploy.sh staging
+
+            # ✅ pm2でアプリケーションを再起動して変更を適用
+            echo "🔄 アプリケーションを再起動中..."
+            pm2 restart crm-app
+
+            echo "✅ デプロイ完了！"
 
