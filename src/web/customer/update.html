@@ -1,65 +1,90 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>顧客情報編集</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h2 class="mb-4">顧客情報を編集してください</h2>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>顧客情報の編集</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <h1 class="app-title">顧客情報の編集</h1>
+          <p class="app-subtitle">最新の顧客情報に更新し、チーム全体で正しい情報を共有しましょう。</p>
+        </div>
+        <div class="app-cta-group">
+          <a href="#" id="back-link" class="btn btn-secondary">詳細へ戻る</a>
+        </div>
+      </header>
+
+      <section class="app-card">
         <form id="customer-form">
-            <input type="hidden" id="customerId" name="customerId">
-            <div class="form-group">
-                <label for="company_name">会社名:</label>
-                <input type="text" class="form-control" id="company_name" name="company_name" required>
-            </div>
-            <div class="form-group">
-                <label for="industry">業種:</label>
-                <input type="text" class="form-control" id="industry" name="industry" required>
-            </div>
-            <div class="form-group">
-                <label for="contact">連絡先:</label>
-                <input type="text" class="form-control" id="contact" name="contact" required>
-            </div>
-            <div class="form-group">
-                <label for="location">所在地:</label>
-                <input type="text" class="form-control" id="location" name="location" required>
-            </div>
+          <input type="hidden" id="customerId" name="customerId" />
+          <div class="form-group">
+            <label for="company_name">会社名</label>
+            <input type="text" class="form-control" id="company_name" name="company_name" required />
+          </div>
+          <div class="form-group">
+            <label for="industry">業種</label>
+            <input type="text" class="form-control" id="industry" name="industry" required />
+          </div>
+          <div class="form-group">
+            <label for="contact">連絡先</label>
+            <input type="text" class="form-control" id="contact" name="contact" required />
+          </div>
+          <div class="form-group">
+            <label for="location">所在地</label>
+            <input type="text" class="form-control" id="location" name="location" required />
+          </div>
+          <div class="d-flex justify-content-between mt-4">
+            <a href="#" id="detail-link" class="btn btn-secondary">詳細へ戻る</a>
             <button type="submit" class="btn btn-primary">確認画面へ</button>
-            <a href="#" id="back-link" class="btn btn-secondary">詳細へ戻る</a>
+          </div>
         </form>
+      </section>
     </div>
+
     <script type="module">
-        import config from '../config.js';
+      import config from "../config.js";
 
-        const params = new URLSearchParams(window.location.search);
-        const customerId = params.get('id');
+      const params = new URLSearchParams(window.location.search);
+      const customerId = params.get("id");
+      const form = document.getElementById("customer-form");
+      const backLink = document.getElementById("back-link");
+      const detailLink = document.getElementById("detail-link");
 
-        // 戻るリンクを設定
-        document.getElementById('back-link').href = `detail.html?id=${customerId}`;
+      if (!customerId) {
+        alert("顧客 ID が指定されていません。");
+        window.location.href = "list.html";
+      } else {
+        backLink.href = `detail.html?id=${customerId}`;
+        detailLink.href = `detail.html?id=${customerId}`;
 
-        // 既存の顧客情報を取得してフォームに設定
-        if (customerId) {
-            fetch(`${config.apiUrl}/customers/${customerId}`)
-                .then(response => response.json())
-                .then(customer => {
-                    document.getElementById('customerId').value = customer.customer_id;
-                    document.getElementById('company_name').value = customer.company_name;
-                    document.getElementById('industry').value = customer.industry;
-                    document.getElementById('contact').value = customer.contact;
-                    document.getElementById('location').value = customer.location;
-                });
-        }
+        fetch(`${config.apiUrl}/customers/${customerId}`)
+          .then((response) => response.json())
+          .then((customer) => {
+            document.getElementById("customerId").value = customer.customer_id || "";
+            document.getElementById("company_name").value = customer.company_name || "";
+            document.getElementById("industry").value = customer.industry || "";
+            document.getElementById("contact").value = customer.contact || "";
+            document.getElementById("location").value = customer.location || "";
+          })
+          .catch(() => {
+            alert("顧客情報の取得に失敗しました。");
+            window.location.href = "list.html";
+          });
+      }
 
-        // フォーム送信時の処理
-        document.getElementById('customer-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const params = new URLSearchParams(formData);
-            window.location.href = `update-confirm.html?${params.toString()}`;
-        });
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const payload = new URLSearchParams(new FormData(form));
+        window.location.href = `update-confirm.html?${payload.toString()}`;
+      });
     </script>
-</body>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  </body>
 </html>

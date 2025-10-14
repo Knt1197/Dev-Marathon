@@ -1,11 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM コントロールパネル</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="./assets/css/style.css" />
 </head>
 <body>
-    Hello Wooooooooorld デプロイいけええ
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <h1 class="app-title">CRM コントロールパネル</h1>
+        <p class="app-subtitle">顧客・案件・交渉情報をひと目で把握し、次のアクションへつなげましょう。</p>
+      </div>
+    </header>
+
+    <section class="app-card">
+      <div class="row align-items-center">
+        <div class="col-lg-7">
+          <h2 class="mb-3">今日のタスクをスマートに管理</h2>
+          <p class="text-muted mb-4">
+            顧客情報の登録から案件の進捗、交渉状況までブラウザひとつでシームレスに操作できます。
+            よく使うセクションだけをカードから直接開けるように整えました。
+          </p>
+          <div class="app-cta-group">
+            <a href="./customer/list.html" class="btn btn-primary">顧客情報を見る</a>
+            <a href="./case/list.html" class="btn btn-secondary">案件リストへ</a>
+          </div>
+        </div>
+        <div class="col-lg-5 mt-4 mt-lg-0">
+          <div class="info-grid">
+            <div class="info-item">
+              <h5>顧客管理</h5>
+              <p>リード〜ロイヤル顧客まで、最新情報を１クリックで確認。</p>
+            </div>
+            <div class="info-item">
+              <h5>案件・交渉</h5>
+              <p>フェーズ別の案件リストで、ネクストアクションを見逃さない。</p>
+            </div>
+            <div class="info-item">
+              <h5>運用サポート</h5>
+              <p>CSV エクスポートやデータ更新も、今後の拡張が可能です。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="app-card">
+      <h3 class="mb-4">ショートカット</h3>
+      <div class="info-grid">
+        <a class="info-item" href="./customer/add.html">
+          <h5>新規顧客登録</h5>
+          <p>お客様情報をすばやく登録し、チームで共有。</p>
+        </a>
+        <a class="info-item" href="./customer/list.html">
+          <h5>顧客一覧</h5>
+          <p>検索・詳細閲覧から更新、削除までワンクリック。</p>
+        </a>
+        <a class="info-item" href="./case/add.html">
+          <h5>案件の作成</h5>
+          <p>案件の概要と担当者を整理して、進捗管理を開始。</p>
+        </a>
+        <a class="info-item" href="./negotiation/add.html">
+          <h5>交渉ログの記録</h5>
+          <p>対話内容を記録し、次の提案に備えましょう。</p>
+        </a>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      &copy; 2025 CRM Portal
+    </footer>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>

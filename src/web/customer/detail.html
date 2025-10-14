@@ -1,89 +1,126 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>顧客詳細</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h2 class="mb-4">顧客詳細</h2>
-        <div id="customer-detail"></div>
-        <a href="list.html" class="btn btn-primary mt-3">一覧へ戻る</a>
-        <a id="update-button" href="#" class="btn btn-warning mt-3">編集</a>
-        <button id="delete-button" class="btn btn-danger mt-3">削除</button>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <h1 class="app-title">顧客詳細</h1>
+          <p class="app-subtitle">顧客情報の全体像とアクションをここから確認・管理できます。</p>
+        </div>
+        <div class="app-cta-group">
+          <a href="list.html" class="btn btn-secondary">一覧へ戻る</a>
+          <a id="update-button" href="#" class="btn btn-warning text-white">編集</a>
+          <button id="delete-button" class="btn btn-danger">削除</button>
+        </div>
+      </header>
+
+      <section class="info-grid" id="customer-overview">
+        <div class="info-item">
+          <h5>会社名</h5>
+          <p id="customer-company">-</p>
+        </div>
+        <div class="info-item">
+          <h5>業種</h5>
+          <p id="customer-industry">-</p>
+        </div>
+        <div class="info-item">
+          <h5>連絡先</h5>
+          <p id="customer-contact">-</p>
+        </div>
+        <div class="info-item">
+          <h5>所在地</h5>
+          <p id="customer-location">-</p>
+        </div>
+      </section>
+
+      <section class="app-card">
+        <h2 class="h5 mb-3">履歴情報</h2>
+        <ul class="timeline" id="customer-timeline">
+          <li>読み込み中です...</li>
+        </ul>
+      </section>
     </div>
 
     <script type="module">
-        import config from '../config.js';
+      import config from "../config.js";
 
-        const params = new URLSearchParams(window.location.search);
-        const customerId = params.get('id');
+      const params = new URLSearchParams(window.location.search);
+      const customerId = params.get("id");
+      const updateButton = document.getElementById("update-button");
+      const deleteButton = document.getElementById("delete-button");
+      const timeline = document.getElementById("customer-timeline");
 
-        if (customerId) {
-            // 顧客情報の取得と表示
-            fetch(`${config.apiUrl}/customers/${customerId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Customer not found');
-                    }
-                    return response.json();
-                })
-                .then(customer => {
-                    document.title = `${customer.company_name} - 顧客詳細`; // タイトルを更新
-                    const detailDiv = document.getElementById('customer-detail');
-                    const keyMap = {
-                        customer_id: '顧客ID',
-                        company_name: '会社名',
-                        industry: '業種',
-                        contact: '連絡先',
-                        location: '所在地',
-                        created_date: '登録日',
-                        updated_date: '更新日'
-                    };
+      const fields = {
+        company_name: document.getElementById("customer-company"),
+        industry: document.getElementById("customer-industry"),
+        contact: document.getElementById("customer-contact"),
+        location: document.getElementById("customer-location"),
+      };
 
-                    let content = '<ul class="list-group">';
-                    for (const key in customer) {
-                        if (key === 'customer_id') continue; // Skip customer_id
-                        const label = keyMap[key] || key;
-                        content += `<li class="list-group-item"><strong>${label}:</strong> ${customer[key] || 'N/A'}</li>`;
-                    }
-                    content += '</ul>';
-                    detailDiv.innerHTML = content;
+      if (!customerId) {
+        timeline.innerHTML = '<li class="empty-message">顧客 ID が指定されていません。</li>';
+      } else {
+        updateButton.href = `update.html?id=${customerId}`;
+        fetch(`${config.apiUrl}/customers/${customerId}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("顧客が見つかりませんでした。");
+            }
+            return response.json();
+          })
+          .then((customer) => {
+            document.title = `${customer.company_name} - 顧客詳細`;
 
-                    // 編集ボタンに正しいリンクを設定
-                    document.getElementById('update-button').href = `update.html?id=${customerId}`;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('customer-detail').innerHTML = `<p class="text-danger">${error.message}</p>`;
-                });
-
-            // 削除ボタンの処理
-            document.getElementById('delete-button').addEventListener('click', () => {
-                if (confirm('本当にこの顧客情報を削除してよろしいですか？')) {
-                    fetch(`${config.apiUrl}/customers/${customerId}`, {
-                        method: 'DELETE'
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('顧客情報を削除しました。');
-                            window.location.href = 'list.html';
-                        } else {
-                            alert('削除に失敗しました。');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('削除中にエラーが発生しました。');
-                    });
-                }
+            Object.entries(fields).forEach(([key, element]) => {
+              element.textContent = customer[key] || "-";
             });
-        } else {
-            document.getElementById('customer-detail').innerHTML = '<p class="text-danger">No customer ID provided.</p>';
+
+            const items = [];
+            if (customer.created_date) {
+              items.push(`<li><strong>登録日:</strong> ${new Date(customer.created_date).toLocaleString()}</li>`);
+            }
+            if (customer.updated_date) {
+              items.push(`<li><strong>更新日:</strong> ${new Date(customer.updated_date).toLocaleString()}</li>`);
+            }
+            timeline.innerHTML = items.length ? items.join("") : '<li class="empty-message">履歴情報はまだありません。</li>';
+          })
+          .catch((error) => {
+            timeline.innerHTML = `<li class="empty-message">${error.message}</li>`;
+          });
+      }
+
+      deleteButton.addEventListener("click", () => {
+        if (!customerId) {
+          alert("顧客 ID が指定されていません。");
+          return;
         }
+
+        if (confirm("本当にこの顧客情報を削除してよろしいですか？")) {
+          fetch(`${config.apiUrl}/customers/${customerId}`, {
+            method: "DELETE",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert("顧客情報を削除しました。");
+                window.location.href = "list.html";
+              } else {
+                alert("削除に失敗しました。");
+              }
+            })
+            .catch(() => alert("削除中にエラーが発生しました。"));
+        }
+      });
     </script>
-</body>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  </body>
 </html>
