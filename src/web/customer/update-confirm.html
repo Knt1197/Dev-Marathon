@@ -1,68 +1,91 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>顧客情報更新確認</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h2 class="mb-4">以下の内容で更新します</h2>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">更新内容</h5>
-                <p class="card-text"><strong>会社名:</strong> <span id="company_name"></span></p>
-                <p class="card-text"><strong>業種:</strong> <span id="industry"></span></p>
-                <p class="card-text"><strong>連絡先:</strong> <span id="contact"></span></p>
-                <p class="card-text"><strong>所在地:</strong> <span id="location"></span></p>
-            </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>顧客情報更新の確認</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <h1 class="app-title">更新内容の確認</h1>
+          <p class="app-subtitle">変更内容を確認し、問題なければ更新を確定してください。</p>
         </div>
-        <div class="mt-4">
-            <button id="confirm-button" class="btn btn-success">この内容で更新</button>
-            <button onclick="history.back()" class="btn btn-secondary">修正</button>
+        <div class="app-cta-group">
+          <button onclick="history.back()" class="btn btn-secondary">修正する</button>
         </div>
+      </header>
+
+      <section class="app-card">
+        <h2 class="h5 mb-4">更新予定の情報</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <h5>会社名</h5>
+            <p id="company_name">-</p>
+          </div>
+          <div class="info-item">
+            <h5>業種</h5>
+            <p id="industry">-</p>
+          </div>
+          <div class="info-item">
+            <h5>連絡先</h5>
+            <p id="contact">-</p>
+          </div>
+          <div class="info-item">
+            <h5>所在地</h5>
+            <p id="location">-</p>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end mt-4">
+          <button id="confirm-button" class="btn btn-success">この内容で更新</button>
+        </div>
+      </section>
     </div>
+
     <script type="module">
-        import config from '../config.js';
+      import config from "../config.js";
 
-        const params = new URLSearchParams(window.location.search);
-        const customerData = {
-            customerId: params.get('customerId'),
-            company_name: params.get('company_name'),
-            industry: params.get('industry'),
-            contact: params.get('contact'),
-            location: params.get('location')
-        };
+      const params = new URLSearchParams(window.location.search);
+      const customerData = {
+        customerId: params.get("customerId"),
+        company_name: params.get("company_name"),
+        industry: params.get("industry"),
+        contact: params.get("contact"),
+        location: params.get("location"),
+      };
 
-        // 画面にデータを表示
-        document.getElementById('company_name').textContent = customerData.company_name;
-        document.getElementById('industry').textContent = customerData.industry;
-        document.getElementById('contact').textContent = customerData.contact;
-        document.getElementById('location').textContent = customerData.location;
+      ["company_name", "industry", "contact", "location"].forEach((field) => {
+        const target = document.getElementById(field);
+        if (target) {
+          target.textContent = customerData[field] || "-";
+        }
+      });
 
-        // 確定ボタンの処理
-        document.getElementById('confirm-button').addEventListener('click', function() {
-            fetch(`${config.apiUrl}/customers/${customerData.customerId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(customerData)
-            }).then(response => response.json())
-              .then(data => {
-                if(data.success) {
-                    alert('顧客情報を更新しました。');
-                    window.location.href = `detail.html?id=${customerData.customerId}`; // 詳細ページに遷移
-                } else {
-                    alert('更新に失敗しました。');
-                }
-              })
-              .catch(error => {
-                console.error('Error:', error);
-                alert('エラーが発生しました。');
-              });
-        });
+      document.getElementById("confirm-button").addEventListener("click", () => {
+        fetch(`${config.apiUrl}/customers/${customerData.customerId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(customerData),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              alert("顧客情報を更新しました。");
+              window.location.href = `detail.html?id=${customerData.customerId}`;
+            } else {
+              alert("更新に失敗しました。");
+            }
+          })
+          .catch(() => {
+            alert("エラーが発生しました。");
+          });
+      });
     </script>
-</body>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  </body>
 </html>

@@ -1,47 +1,60 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>顧客情報入力</title>
-    <!-- Bootstrap CSSの読み込み -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h2 class="mb-4">顧客情報を入力してください、真デプロイ</h2>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>顧客情報の登録</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <h1 class="app-title">顧客情報の登録</h1>
+          <p class="app-subtitle">顧客との最初の接点を丁寧に記録して、チーム全体で共有しましょう。</p>
+        </div>
+        <div class="app-cta-group">
+          <a href="list.html" class="btn btn-secondary">一覧へ戻る</a>
+        </div>
+      </header>
+
+      <section class="app-card">
         <form id="customer-form">
-            <div class="form-group">
-                <label for="companyName">会社名:</label>
-                <input type="text" class="form-control" id="companyName" name="companyName" required>
-            </div>
-            <div class="form-group">
-                <label for="industry">業種:</label>
-                <input type="text" class="form-control" id="industry" name="industry" required>
-            </div>
-            <div class="form-group">
-                <label for="contact">連絡先:</label>
-                <input type="text" class="form-control" id="contact" name="contact" required>
-            </div>
-            <div class="form-group">
-                <label for="location">所在地:</label>
-                <input type="text" class="form-control" id="location" name="location" required>
-            </div>
-            <button type="submit" class="btn btn-primary">確認画面へ</button>
+          <div class="form-group">
+            <label for="companyName">会社名</label>
+            <input type="text" class="form-control" id="companyName" name="companyName" placeholder="例）サンプル株式会社" required />
+          </div>
+          <div class="form-group">
+            <label for="industry">業種</label>
+            <input type="text" class="form-control" id="industry" name="industry" placeholder="例）IT・ソフトウェア" required />
+          </div>
+          <div class="form-group">
+            <label for="contact">連絡先</label>
+            <input type="text" class="form-control" id="contact" name="contact" placeholder="例）03-0000-0000" required />
+          </div>
+          <div class="form-group">
+            <label for="location">所在地</label>
+            <input type="text" class="form-control" id="location" name="location" placeholder="例）東京都千代田区..." required />
+          </div>
+          <div class="d-flex justify-content-between mt-4">
             <a href="list.html" class="btn btn-secondary">一覧へ戻る</a>
+            <button type="submit" class="btn btn-primary">確認画面へ</button>
+          </div>
         </form>
+      </section>
     </div>
+
     <script>
-        document.getElementById('customer-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const params = new URLSearchParams(formData);
-            window.location.href = `add-confirm.html?${params.toString()}`;
-        });
+      const form = document.getElementById("customer-form");
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const params = new URLSearchParams(new FormData(form));
+        window.location.href = `add-confirm.html?${params.toString()}`;
+      });
     </script>
-    <!-- BootstrapのJavaScriptの読み込み -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-</body>
+  </body>
 </html>

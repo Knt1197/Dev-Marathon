@@ -15,10 +15,32 @@ jobs:
         with:
           fetch-depth: 0
 
+      # 🔹 ステージング環境へデプロイ
+      - name: "ステージングサーバーへデプロイ"
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEV_SSH_HOST }}
+          port: ${{ secrets.DEV_SSH_PORT }}
+          username: ${{ secrets.DEV_SSH_USER }}
+          key: ${{ secrets.DEV_SSH_SSH_KEY }}
+          script: |
+            set -e
+            echo "🚀 ステージングサーバーへデプロイを開始します..."
+            cd /app/kanta_maruhashi
+            for file in deploy.sh deploy_staging.sh deploy_production.sh; do
+              if [ -f "$file" ] && ! git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
+                rm -f "$file"
+              fi
+            done
+            git fetch origin main
+            git reset --hard origin/main
+            cd src/node && npm install && cd ../..
+            bash deploy_staging.sh
+            echo "✅ ステージングデプロイ完了！"
+
       # 🔹 ステージング環境でテストを実行
       - name: "ステージングでのテスト実行"
         uses: appleboy/ssh-action@v1.0.0
-        continue-on-error: true
         with:
           host: ${{ secrets.DEV_SSH_HOST }}
           port: ${{ secrets.DEV_SSH_PORT }}
