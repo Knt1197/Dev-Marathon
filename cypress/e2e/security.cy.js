@@ -46,7 +46,7 @@ describe('セキュリティ関連のテスト', () => {
         .within(() => {
           cy.get('td').eq(2)
             .invoke('text')
-            .should('not.include', '<script>');
+            .should('include', "<script>alert('XSS')</script>");
         });
       cy.get('#customer-list script').should('not.exist');
     });
