@@ -53,6 +53,7 @@
           </tbody>
         </table>
       </section>
+      <div id="pagination" class="pagination-controls d-flex justify-content-center mt-4 d-none"></div>
     </div>
 
     <script type="module">
@@ -61,10 +62,13 @@
       const list = document.getElementById("customer-list");
       const searchInput = document.getElementById("search-input");
       const tagsContainer = document.getElementById("industry-tags");
+      const paginationContainer = document.getElementById("pagination");
       
       let allCustomers = [];
       let currentSearchTerm = "";
       let selectedIndustry = "";
+      let currentPage = 1;
+      const ITEMS_PER_PAGE = 15;
 
       // フィルタリングとテーブル描画をまとめて行う関数
       const applyFiltersAndRender = () => {
@@ -82,7 +86,15 @@
           );
         }
 
+        const totalPages = Math.ceil(filteredCustomers.length / ITEMS_PER_PAGE);
+        if (!filteredCustomers.length) {
+          currentPage = 1;
+        } else if (currentPage > totalPages) {
+          currentPage = totalPages;
+        }
+
         renderTable(filteredCustomers);
+        renderPagination(totalPages);
       };
 
       // テーブルをレンダリングする関数
@@ -98,7 +110,10 @@
           return;
         }
 
-        customers.forEach(customer => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const pageCustomers = customers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+        pageCustomers.forEach(customer => {
           const row = list.insertRow();
           
           const nameCell = row.insertCell(0);
@@ -118,6 +133,55 @@
         });
       };
 
+      const renderPagination = (totalPages) => {
+        paginationContainer.innerHTML = "";
+
+        if (totalPages <= 1) {
+          paginationContainer.classList.add("d-none");
+          return;
+        }
+
+        paginationContainer.classList.remove("d-none");
+
+        const createNavButton = (label, targetPage, disabled) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "pagination-btn";
+          button.textContent = label;
+
+          if (disabled) {
+            button.disabled = true;
+          } else {
+            button.addEventListener("click", () => {
+              currentPage = targetPage;
+              applyFiltersAndRender();
+            });
+          }
+
+          paginationContainer.appendChild(button);
+        };
+
+        createNavButton("前へ", currentPage - 1, currentPage === 1);
+
+        for (let page = 1; page <= totalPages; page += 1) {
+          const pageButton = document.createElement("button");
+          pageButton.type = "button";
+          pageButton.className = "pagination-btn";
+          pageButton.textContent = page;
+          if (page === currentPage) {
+            pageButton.classList.add("active");
+          } else {
+            pageButton.addEventListener("click", () => {
+              currentPage = page;
+              applyFiltersAndRender();
+            });
+          }
+          paginationContainer.appendChild(pageButton);
+        }
+
+        createNavButton("次へ", currentPage + 1, currentPage === totalPages);
+      };
+
       // 業種タグをレンダリングする関数
       const renderTags = () => {
         const industries = ['All', ...new Set(allCustomers.map(c => c.industry))];
@@ -133,6 +197,7 @@
 
           tag.addEventListener('click', () => {
             selectedIndustry = (industry === 'All') ? "" : industry;
+            currentPage = 1;
             document.querySelectorAll('#industry-tags .badge-industry').forEach(t => t.classList.remove('active'));
             tag.classList.add('active');
             applyFiltersAndRender();
@@ -144,6 +209,7 @@
       // 検索イベントのリスナー
       searchInput.addEventListener("input", () => {
         currentSearchTerm = searchInput.value.toLowerCase();
+        currentPage = 1;
         applyFiltersAndRender();
       });
 
@@ -159,9 +225,12 @@
             cell.colSpan = 3;
             cell.classList.add("text-center", "py-5");
             cell.innerHTML = '<div class="empty-message">まだ登録された顧客がありません。<br>「新規登録」から追加してみましょう。</div>';
+            paginationContainer.innerHTML = "";
+            paginationContainer.classList.add("d-none");
             return;
           }
           renderTags();
+          currentPage = 1;
           applyFiltersAndRender();
         })
         .catch(() => {
@@ -171,6 +240,8 @@
           cell.colSpan = 3;
           cell.classList.add("text-center", "py-5");
           cell.innerHTML = '<div class="empty-message">データの取得に失敗しました。時間をおいて再度お試しください。</div>';
+          paginationContainer.innerHTML = "";
+          paginationContainer.classList.add("d-none");
         });
     </script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>

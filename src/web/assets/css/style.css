@@ -187,6 +187,35 @@ a:hover {
   color: #fff;
 }
 
+.pagination-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.pagination-btn {
+  border: 1px solid var(--primary);
+  background-color: #fff;
+  color: var(--primary-dark);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.pagination-btn:not(:disabled):hover,
+.pagination-btn.active {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 form .form-control,
 form input,
 form textarea,

@@ -41,13 +41,35 @@ describe('セキュリティ関連のテスト', () => {
 
       cy.wait('@getCustomers');
       cy.location('pathname').should('include', '/kanta_maruhashi/customer/list.html');
-      cy.contains('#customer-list tr', companyName)
-        .should('be.visible')
-        .within(() => {
-          cy.get('td').eq(2)
-            .invoke('text')
-            .should('include', "<script>alert('XSS')</script>");
+      const assertCustomerInList = () => {
+        return cy.get('#customer-list tr').then(($rows) => {
+          const match = Array.from($rows).find((row) => row.innerText.includes(companyName));
+          if (match) {
+            return cy.wrap(match)
+              .scrollIntoView()
+              .should('be.visible')
+              .within(() => {
+                cy.get('td').eq(2)
+                  .invoke('text')
+                  .should('include', "<script>alert('XSS')</script>");
+              });
+          }
+
+          return cy.get('#pagination .pagination-btn').then(($buttons) => {
+            const nextButton = Array.from($buttons).find(
+              (btn) => btn.textContent.trim() === '次へ' && !btn.disabled
+            );
+            if (!nextButton) {
+              throw new Error(`顧客 ${companyName} が一覧から見つかりませんでした`);
+            }
+            return cy.wrap(nextButton)
+              .click()
+              .then(() => assertCustomerInList());
+          });
         });
+      };
+
+      assertCustomerInList();
       cy.get('#customer-list script').should('not.exist');
     });
   });
