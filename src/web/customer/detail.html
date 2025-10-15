@@ -10,18 +10,31 @@
   <body>
     <div class="app-shell">
       <header class="app-header">
+      <div class="container d-flex justify-content-between align-items-center">
         <div>
-          <h1 class="app-title">顧客詳細</h1>
-          <p class="app-subtitle">顧客情報の全体像とアクションをここから確認・管理できます。</p>
+          <h1 class="app-title mb-0">
+            <a href="../index.html" class="text-white text-decoration-none">顧客管理システム</a>
+          </h1>
         </div>
+        <nav>
+          <ul class="nav">
+            <li class="nav-item"><a class="nav-link text-white active" href="./list.html">顧客</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="../case/list.html">案件</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="../negotiation/list.html">交渉</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+      <section class="app-actions">
+        <a href="list.html" class="btn btn-secondary">一覧へ戻る</a>
         <div class="app-cta-group">
-          <a href="list.html" class="btn btn-secondary">一覧へ戻る</a>
           <a id="update-button" href="#" class="btn btn-warning text-white">編集</a>
           <button id="delete-button" class="btn btn-danger">削除</button>
         </div>
-      </header>
+      </section>
 
-      <section class="info-grid" id="customer-overview">
+      <section class="info-grid mb-4" id="customer-overview">
         <div class="info-item">
           <h5>会社名</h5>
           <p id="customer-company">-</p>
@@ -67,7 +80,9 @@
       if (!customerId) {
         timeline.innerHTML = '<li class="empty-message">顧客 ID が指定されていません。</li>';
       } else {
-        updateButton.href = `update.html?id=${customerId}`;
+        if (updateButton) {
+          updateButton.href = `update.html?id=${customerId}`;
+        }
         fetch(`${config.apiUrl}/customers/${customerId}`)
           .then((response) => {
             if (!response.ok) {
@@ -96,28 +111,30 @@
           });
       }
 
-      deleteButton.addEventListener("click", () => {
-        if (!customerId) {
-          alert("顧客 ID が指定されていません。");
-          return;
-        }
+      if (deleteButton) {
+        deleteButton.addEventListener("click", () => {
+          if (!customerId) {
+            alert("顧客 ID が指定されていません。");
+            return;
+          }
 
-        if (confirm("本当にこの顧客情報を削除してよろしいですか？")) {
-          fetch(`${config.apiUrl}/customers/${customerId}`, {
-            method: "DELETE",
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.success) {
-                alert("顧客情報を削除しました。");
-                window.location.href = "list.html";
-              } else {
-                alert("削除に失敗しました。");
-              }
+          if (confirm("本当にこの顧客情報を削除してよろしいですか？")) {
+            fetch(`${config.apiUrl}/customers/${customerId}`, {
+              method: "DELETE",
             })
-            .catch(() => alert("削除中にエラーが発生しました。"));
-        }
-      });
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  alert("顧客情報を削除しました。");
+                  window.location.href = "list.html";
+                } else {
+                  alert("削除に失敗しました。");
+                }
+              })
+              .catch(() => alert("削除中にエラーが発生しました。"));
+          }
+        });
+      }
     </script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>

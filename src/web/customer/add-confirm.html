@@ -10,14 +10,21 @@
   <body>
     <div class="app-shell">
       <header class="app-header">
+      <div class="container d-flex justify-content-between align-items-center">
         <div>
-          <h1 class="app-title">登録内容の確認</h1>
-          <p class="app-subtitle">入力内容を再確認してから登録を確定できます。</p>
+          <h1 class="app-title mb-0">
+            <a href="../index.html" class="text-white text-decoration-none">顧客管理システム</a>
+          </h1>
         </div>
-        <div class="app-cta-group">
-          <button onclick="history.back()" class="btn btn-secondary">修正する</button>
-        </div>
-      </header>
+        <nav>
+          <ul class="nav">
+            <li class="nav-item"><a class="nav-link text-white active" href="./list.html">顧客</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="../case/list.html">案件</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="../negotiation/list.html">交渉</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
 
       <section class="app-card">
         <h2 class="h5 mb-4">登録予定の情報</h2>

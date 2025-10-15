@@ -10,14 +10,21 @@
   <body>
     <div class="app-shell">
       <header class="app-header">
+      <div class="container d-flex justify-content-between align-items-center">
         <div>
-          <h1 class="app-title">顧客情報の編集</h1>
-          <p class="app-subtitle">最新の顧客情報に更新し、チーム全体で正しい情報を共有しましょう。</p>
+          <h1 class="app-title mb-0">
+            <a href="../index.html" class="text-white text-decoration-none">顧客管理システム</a>
+          </h1>
         </div>
-        <div class="app-cta-group">
-          <a href="#" id="back-link" class="btn btn-secondary">詳細へ戻る</a>
-        </div>
-      </header>
+        <nav>
+          <ul class="nav">
+            <li class="nav-item"><a class="nav-link text-white active" href="./list.html">顧客</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="../case/list.html">案件</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="../negotiation/list.html">交渉</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
 
       <section class="app-card">
         <form id="customer-form">
@@ -59,8 +66,12 @@
         alert("顧客 ID が指定されていません。");
         window.location.href = "list.html";
       } else {
-        backLink.href = `detail.html?id=${customerId}`;
-        detailLink.href = `detail.html?id=${customerId}`;
+        if (backLink) {
+          backLink.href = `detail.html?id=${customerId}`;
+        }
+        if (detailLink) {
+          detailLink.href = `detail.html?id=${customerId}`;
+        }
 
         fetch(`${config.apiUrl}/customers/${customerId}`)
           .then((response) => response.json())

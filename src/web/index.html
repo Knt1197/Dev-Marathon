@@ -3,16 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CRM コントロールパネル</title>
+  <title>顧客管理システム</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
   <link rel="stylesheet" href="./assets/css/style.css" />
 </head>
 <body>
   <div class="app-shell">
     <header class="app-header">
-      <div>
-        <h1 class="app-title">CRM コントロールパネル</h1>
-        <p class="app-subtitle">顧客・案件・交渉情報をひと目で把握し、次のアクションへつなげましょう。</p>
+      <div class="container d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="app-title mb-0">
+            <a href="./index.html" class="text-white text-decoration-none">顧客管理システム</a>
+          </h1>
+        </div>
+        <nav>
+          <ul class="nav">
+            <li class="nav-item"><a class="nav-link text-white" href="./customer/list.html">顧客</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="./case/list.html">案件</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="./negotiation/list.html">交渉</a></li>
+          </ul>
+        </nav>
       </div>
     </header>
 

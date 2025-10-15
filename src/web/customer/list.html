@@ -10,23 +10,40 @@
   <body>
     <div class="app-shell">
       <header class="app-header">
-        <div>
-          <h1 class="app-title">顧客情報一覧</h1>
-          <p class="app-subtitle">登録済みの顧客を検索し、詳細や編集ページへスムーズにアクセスできます。</p>
-        </div>
-        <div class="app-cta-group">
-          <a href="../index.html" class="btn btn-secondary">ダッシュボード</a>
-          <a href="add.html" class="btn btn-primary">新規登録</a>
+        <div class="container d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="app-title mb-0">
+              <a href="../index.html" class="text-white text-decoration-none">顧客管理システム</a>
+            </h1>
+          </div>
+          <nav>
+            <ul class="nav">
+              <li class="nav-item"><a class="nav-link text-white active" href="./list.html">顧客</a></li>
+              <li class="nav-item"><a class="nav-link text-white" href="../case/list.html">案件</a></li>
+              <li class="nav-item"><a class="nav-link text-white" href="../negotiation/list.html">交渉</a></li>
+            </ul>
+          </nav>
         </div>
       </header>
+
+      <section class="app-actions">
+        <form id="search-form" class="d-flex flex-grow-1 mr-3">
+          <input type="search" id="search-input" class="form-control" placeholder="会社名で検索...">
+        </form>
+        <div class="app-cta-group">
+          <a href="add.html" class="btn btn-primary">新規登録</a>
+        </div>
+      </section>
+
+      <div id="industry-tags" class="mb-4 d-flex flex-wrap gap-2"></div>
 
       <section class="app-card app-table">
         <table class="table mb-0">
           <thead>
             <tr>
-              <th scope="col">#</th>
               <th scope="col">会社名</th>
               <th scope="col">連絡先</th>
+              <th scope="col">業種</th>
             </tr>
           </thead>
           <tbody id="customer-list">
@@ -42,13 +59,101 @@
       import config from "../config.js";
 
       const list = document.getElementById("customer-list");
+      const searchInput = document.getElementById("search-input");
+      const tagsContainer = document.getElementById("industry-tags");
+      
+      let allCustomers = [];
+      let currentSearchTerm = "";
+      let selectedIndustry = "";
 
+      // フィルタリングとテーブル描画をまとめて行う関数
+      const applyFiltersAndRender = () => {
+        let filteredCustomers = allCustomers;
+
+        // 業種で絞り込み
+        if (selectedIndustry) {
+          filteredCustomers = filteredCustomers.filter(c => c.industry === selectedIndustry);
+        }
+
+        // 検索語で絞り込み
+        if (currentSearchTerm) {
+          filteredCustomers = filteredCustomers.filter(c => 
+            c.company_name.toLowerCase().includes(currentSearchTerm)
+          );
+        }
+
+        renderTable(filteredCustomers);
+      };
+
+      // テーブルをレンダリングする関数
+      const renderTable = (customers) => {
+        list.innerHTML = "";
+
+        if (!customers.length) {
+          const emptyRow = list.insertRow();
+          const cell = emptyRow.insertCell(0);
+          cell.colSpan = 3;
+          cell.classList.add("text-center", "py-5");
+          cell.innerHTML = '<div class="empty-message">該当する顧客が見つかりません。</div>';
+          return;
+        }
+
+        customers.forEach(customer => {
+          const row = list.insertRow();
+          
+          const nameCell = row.insertCell(0);
+          const link = document.createElement("a");
+          link.href = `detail.html?id=${customer.customer_id}`;
+          link.textContent = customer.company_name;
+          link.classList.add("font-weight-bold");
+          nameCell.appendChild(link);
+
+          row.insertCell(1).textContent = customer.contact || "-";
+          
+          const industryCell = row.insertCell(2);
+          const industryBadge = document.createElement('span');
+          industryBadge.className = 'badge-industry';
+          industryBadge.textContent = customer.industry;
+          industryCell.appendChild(industryBadge);
+        });
+      };
+
+      // 業種タグをレンダリングする関数
+      const renderTags = () => {
+        const industries = ['All', ...new Set(allCustomers.map(c => c.industry))];
+        tagsContainer.innerHTML = "";
+        
+        industries.forEach(industry => {
+          const tag = document.createElement('span');
+          tag.className = 'badge-industry';
+          tag.textContent = industry;
+          if (industry === (selectedIndustry || 'All')) {
+            tag.classList.add('active');
+          }
+
+          tag.addEventListener('click', () => {
+            selectedIndustry = (industry === 'All') ? "" : industry;
+            document.querySelectorAll('#industry-tags .badge-industry').forEach(t => t.classList.remove('active'));
+            tag.classList.add('active');
+            applyFiltersAndRender();
+          });
+          tagsContainer.appendChild(tag);
+        });
+      };
+
+      // 検索イベントのリスナー
+      searchInput.addEventListener("input", () => {
+        currentSearchTerm = searchInput.value.toLowerCase();
+        applyFiltersAndRender();
+      });
+
+      // 初期データの取得
       fetch(`${config.apiUrl}/customers`)
         .then((response) => response.json())
         .then((data) => {
-          list.innerHTML = "";
-
-          if (!data.length) {
+          allCustomers = data;
+          if (!allCustomers.length) {
+            list.innerHTML = "";
             const emptyRow = list.insertRow();
             const cell = emptyRow.insertCell(0);
             cell.colSpan = 3;
@@ -56,20 +161,8 @@
             cell.innerHTML = '<div class="empty-message">まだ登録された顧客がありません。<br>「新規登録」から追加してみましょう。</div>';
             return;
           }
-
-          data.forEach((customer, index) => {
-            const row = list.insertRow();
-            row.insertCell(0).textContent = index + 1;
-
-            const nameCell = row.insertCell(1);
-            const link = document.createElement("a");
-            link.href = `detail.html?id=${customer.customer_id}`;
-            link.textContent = customer.company_name;
-            link.classList.add("font-weight-bold");
-            nameCell.appendChild(link);
-
-            row.insertCell(2).textContent = customer.contact || "-";
-          });
+          renderTags();
+          applyFiltersAndRender();
         })
         .catch(() => {
           list.innerHTML = "";

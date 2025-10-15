@@ -10,14 +10,21 @@
   <body>
     <div class="app-shell">
       <header class="app-header">
+      <div class="container d-flex justify-content-between align-items-center">
         <div>
-          <h1 class="app-title">顧客情報の登録</h1>
-          <p class="app-subtitle">顧客との最初の接点を丁寧に記録して、チーム全体で共有しましょう。</p>
+          <h1 class="app-title mb-0">
+            <a href="../index.html" class="text-white text-decoration-none">顧客管理システム</a>
+          </h1>
         </div>
-        <div class="app-cta-group">
-          <a href="list.html" class="btn btn-secondary">一覧へ戻る</a>
-        </div>
-      </header>
+        <nav>
+          <ul class="nav">
+            <li class="nav-item"><a class="nav-link text-white active" href="./list.html">顧客</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="../case/list.html">案件</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="../negotiation/list.html">交渉</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
 
       <section class="app-card">
         <form id="customer-form">
