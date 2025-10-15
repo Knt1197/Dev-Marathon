@@ -83,6 +83,34 @@ app.delete("/customers/:id", async (req, res) => {
   }
 });
 
+app.post("/customers/bulk-delete", async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: "削除対象が選択されていません。" });
+    }
+
+    const numericIds = ids
+      .map((value) => Number(value))
+      .filter((value) => Number.isInteger(value));
+
+    if (numericIds.length !== ids.length) {
+      return res.status(400).json({ success: false, message: "削除対象の形式が正しくありません。" });
+    }
+
+    const result = await pool.query(
+      "DELETE FROM customers WHERE customer_id = ANY($1::int[])",
+      [numericIds]
+    );
+
+    res.json({ success: true, deletedCount: result.rowCount });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "削除処理中にエラーが発生しました。" });
+  }
+});
+
 app.put("/customers/:id", async (req, res) => {
   try {
     const { id } = req.params;

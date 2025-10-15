@@ -216,6 +216,17 @@ a:hover {
   cursor: default;
 }
 
+.table thead th:first-child,
+.table tbody td:first-child {
+  width: 3rem;
+  text-align: center;
+}
+
+.table tbody td:first-child input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+}
+
 form .form-control,
 form input,
 form textarea,

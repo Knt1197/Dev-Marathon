@@ -41,6 +41,9 @@
         <table class="table mb-0">
           <thead>
             <tr>
+              <th scope="col">
+                <input type="checkbox" id="select-all" aria-label="顧客を全選択" />
+              </th>
               <th scope="col">会社名</th>
               <th scope="col">連絡先</th>
               <th scope="col">業種</th>
@@ -48,7 +51,7 @@
           </thead>
           <tbody id="customer-list">
             <tr>
-              <td colspan="3" class="text-center text-muted py-4">読み込み中です...</td>
+              <td colspan="4" class="text-center text-muted py-4">読み込み中です...</td>
             </tr>
           </tbody>
         </table>
@@ -63,12 +66,79 @@
       const searchInput = document.getElementById("search-input");
       const tagsContainer = document.getElementById("industry-tags");
       const paginationContainer = document.getElementById("pagination");
+      const selectAllCheckbox = document.getElementById("select-all");
+      const bulkDeleteButton = document.createElement("button");
+      selectAllCheckbox.checked = false;
+      selectAllCheckbox.disabled = true;
       
       let allCustomers = [];
       let currentSearchTerm = "";
       let selectedIndustry = "";
       let currentPage = 1;
       const ITEMS_PER_PAGE = 15;
+      const selectedCustomerIds = new Set();
+
+      bulkDeleteButton.type = "button";
+      bulkDeleteButton.id = "bulk-delete-button";
+      bulkDeleteButton.className = "btn btn-danger ml-3";
+      bulkDeleteButton.textContent = "選択削除";
+      bulkDeleteButton.disabled = true;
+
+      document.querySelector(".app-cta-group").appendChild(bulkDeleteButton);
+
+      const updateBulkDeleteButton = () => {
+        bulkDeleteButton.disabled = selectedCustomerIds.size === 0;
+      };
+
+      const syncSelectAllState = () => {
+        const checkboxes = list.querySelectorAll('input.customer-select');
+        const totalVisible = checkboxes.length;
+
+        if (!totalVisible) {
+          selectAllCheckbox.checked = false;
+          selectAllCheckbox.indeterminate = false;
+          selectAllCheckbox.disabled = true;
+          return;
+        }
+
+        selectAllCheckbox.disabled = false;
+        const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+        selectAllCheckbox.checked = checkedCount === totalVisible;
+        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalVisible;
+      };
+
+      const handleSelectionChange = (customerId, isSelected) => {
+        const id = Number(customerId);
+        if (!Number.isInteger(id)) {
+          return;
+        }
+        if (isSelected) {
+          selectedCustomerIds.add(id);
+        } else {
+          selectedCustomerIds.delete(id);
+        }
+        updateBulkDeleteButton();
+        syncSelectAllState();
+      };
+
+      const readJsonOrThrow = async (response, defaultErrorMessage) => {
+        const message = defaultErrorMessage || "削除に失敗しました。";
+        const contentType = response.headers.get("content-type") || "";
+
+        if (!contentType.includes("application/json")) {
+          if (!response.ok) {
+            throw new Error(`${message} (status: ${response.status})`);
+          }
+          throw new Error("予期しないレスポンス形式が返されました。");
+        }
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || `${message} (status: ${response.status})`);
+        }
+
+        return data;
+      };
 
       // フィルタリングとテーブル描画をまとめて行う関数
       const applyFiltersAndRender = () => {
@@ -104,9 +174,12 @@
         if (!customers.length) {
           const emptyRow = list.insertRow();
           const cell = emptyRow.insertCell(0);
-          cell.colSpan = 3;
+          cell.colSpan = 4;
           cell.classList.add("text-center", "py-5");
           cell.innerHTML = '<div class="empty-message">該当する顧客が見つかりません。</div>';
+          selectAllCheckbox.checked = false;
+          selectAllCheckbox.indeterminate = false;
+          selectAllCheckbox.disabled = true;
           return;
         }
 
@@ -115,22 +188,35 @@
 
         pageCustomers.forEach(customer => {
           const row = list.insertRow();
+
+          const selectCell = row.insertCell(0);
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.className = "customer-select";
+          checkbox.dataset.customerId = customer.customer_id;
+          checkbox.checked = selectedCustomerIds.has(customer.customer_id);
+          checkbox.addEventListener("change", (event) => {
+            handleSelectionChange(customer.customer_id, event.target.checked);
+          });
+          selectCell.appendChild(checkbox);
           
-          const nameCell = row.insertCell(0);
+          const nameCell = row.insertCell(1);
           const link = document.createElement("a");
           link.href = `detail.html?id=${customer.customer_id}`;
           link.textContent = customer.company_name;
           link.classList.add("font-weight-bold");
           nameCell.appendChild(link);
 
-          row.insertCell(1).textContent = customer.contact || "-";
+          row.insertCell(2).textContent = customer.contact || "-";
           
-          const industryCell = row.insertCell(2);
+          const industryCell = row.insertCell(3);
           const industryBadge = document.createElement('span');
           industryBadge.className = 'badge-industry';
           industryBadge.textContent = customer.industry;
           industryCell.appendChild(industryBadge);
         });
+
+        syncSelectAllState();
       };
 
       const renderPagination = (totalPages) => {
@@ -213,6 +299,95 @@
         applyFiltersAndRender();
       });
 
+      selectAllCheckbox.addEventListener("change", (event) => {
+        const isChecked = event.target.checked;
+        const checkboxes = list.querySelectorAll('input.customer-select');
+        checkboxes.forEach((checkbox) => {
+          checkbox.checked = isChecked;
+          const customerId = Number(checkbox.dataset.customerId);
+          if (isChecked) {
+            selectedCustomerIds.add(customerId);
+          } else {
+            selectedCustomerIds.delete(customerId);
+          }
+        });
+        updateBulkDeleteButton();
+        syncSelectAllState();
+      });
+
+      bulkDeleteButton.addEventListener("click", async () => {
+        if (selectedCustomerIds.size === 0) {
+          return;
+        }
+
+        const ids = Array.from(selectedCustomerIds);
+        if (!confirm(`選択した ${ids.length} 件の顧客を削除しますか？`)) {
+          return;
+        }
+
+        const removeCustomersFromState = (removedIds) => {
+          if (!removedIds.length) {
+            return;
+          }
+          const removedSet = new Set(removedIds);
+          allCustomers = allCustomers.filter(customer => !removedSet.has(Number(customer.customer_id)));
+          removedIds.forEach(id => selectedCustomerIds.delete(id));
+          updateBulkDeleteButton();
+          applyFiltersAndRender();
+        };
+
+        try {
+          const response = await fetch(`${config.apiUrl}/customers/bulk-delete`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids }),
+          });
+
+          const result = await readJsonOrThrow(response, "削除に失敗しました。");
+          if (!result.success) {
+            throw new Error(result.message || "削除に失敗しました。");
+          }
+
+          removeCustomersFromState(ids);
+          alert(`顧客情報を${result.deletedCount || ids.length}件削除しました。`);
+        } catch (error) {
+          console.warn("Bulk delete endpoint failed, attempting individual deletions.", error);
+
+          const successfulIds = [];
+          const failedIds = [];
+
+          for (const id of ids) {
+            try {
+              const response = await fetch(`${config.apiUrl}/customers/${id}`, {
+                method: "DELETE",
+              });
+              const data = await readJsonOrThrow(response, "削除に失敗しました。");
+              if (data.success) {
+                successfulIds.push(id);
+              } else {
+                failedIds.push(id);
+              }
+            } catch (individualError) {
+              failedIds.push(id);
+            }
+          }
+
+          removeCustomersFromState(successfulIds);
+
+          if (successfulIds.length) {
+            alert(`顧客情報を${successfulIds.length}件削除しました。`);
+          }
+
+          if (failedIds.length) {
+            const failedCount = failedIds.length;
+            const detail = failedCount === ids.length
+              ? "削除に失敗しました。"
+              : `一部の顧客の削除に失敗しました。（${failedCount}件）`;
+            alert(detail);
+          }
+        }
+      });
+
       // 初期データの取得
       fetch(`${config.apiUrl}/customers`)
         .then((response) => response.json())
@@ -222,11 +397,14 @@
             list.innerHTML = "";
             const emptyRow = list.insertRow();
             const cell = emptyRow.insertCell(0);
-            cell.colSpan = 3;
+            cell.colSpan = 4;
             cell.classList.add("text-center", "py-5");
             cell.innerHTML = '<div class="empty-message">まだ登録された顧客がありません。<br>「新規登録」から追加してみましょう。</div>';
             paginationContainer.innerHTML = "";
             paginationContainer.classList.add("d-none");
+            selectAllCheckbox.disabled = true;
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
             return;
           }
           renderTags();
@@ -237,11 +415,14 @@
           list.innerHTML = "";
           const errorRow = list.insertRow();
           const cell = errorRow.insertCell(0);
-          cell.colSpan = 3;
+          cell.colSpan = 4;
           cell.classList.add("text-center", "py-5");
           cell.innerHTML = '<div class="empty-message">データの取得に失敗しました。時間をおいて再度お試しください。</div>';
           paginationContainer.innerHTML = "";
           paginationContainer.classList.add("d-none");
+          selectAllCheckbox.disabled = true;
+          selectAllCheckbox.checked = false;
+          selectAllCheckbox.indeterminate = false;
         });
     </script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>

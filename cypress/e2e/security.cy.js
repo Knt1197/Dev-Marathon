@@ -49,7 +49,7 @@ describe('セキュリティ関連のテスト', () => {
               .scrollIntoView()
               .should('be.visible')
               .within(() => {
-                cy.get('td').eq(2)
+                cy.get('td').eq(3)
                   .invoke('text')
                   .should('include', "<script>alert('XSS')</script>");
               });
